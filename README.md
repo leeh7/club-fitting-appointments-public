@@ -20,6 +20,10 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
+## Goals / Areas of Improvements
+- Use https://ui.shadcn.com/docs/installation/next for components and use tailwind to style
+- Use map picker to geolocate position of user, send coordinates in center of location to find nearby locations
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
