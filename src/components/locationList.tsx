@@ -1,26 +1,52 @@
-import { ListGroup } from 'react-bootstrap'
-import useSWR from 'swr'
-import { useAppStore } from '../store/store'
+import { ListGroup } from 'react-bootstrap';
+import useSWR from 'swr';
+import { useAppStore } from '../store/store';
+import SearchBar from './searchBar';
+import React, { useState, useEffect } from 'react';
 
 function LocationList() {
-  const { selectedLocation, setSelectedLocation, fetchLocations } =
-    useAppStore()
+  const { selectedLocation, setSelectedLocation, fetchLocations, setLocations, locations } =
+    useAppStore();
+  const [filteredLocations, setFilteredLocations] = useState(locations);
+  const [query, setQuery] = useState('');
 
-  const {
-    data: locations,
-    error,
-    isLoading,
-  } = useSWR('/api/locations', fetchLocations)
+  const { data, error, isLoading } = useSWR('/api/locations', fetchLocations, {
+    onSuccess: (data) => {
+      if(data != null) {
+        setLocations(data); // Update the store with fetched locations
+        setFilteredLocations(data); // Initialize filtered locations with all fetched locations
+      }
+    },
+  });
 
-  if (error) return <div>failed to load</div>
-  if (isLoading) return <div>loading...</div>
-  if (!locations) return <div>No locations found, please refresh the page.</div>
+  useEffect(() => {
+    if (query) {
+      setFilteredLocations(
+        locations.filter((location) =>
+          location.name.toLowerCase().includes(query.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredLocations(locations);
+    }
+  }, [query, locations]);
+
+  if (error) return <div>Failed to load locations</div>;
+  if (isLoading) return <div>Loading...</div>;
+  if (!locations || locations.length === 0) return <div>No locations found, please refresh the page.</div>;
+
+  const handleSearch = (searchQuery: string) => {
+    setQuery(searchQuery);
+  };
 
   return (
     <div>
       <h2>Select a Location</h2>
+
+      <SearchBar onSearch={handleSearch} />
+
       <ListGroup>
-        {locations.map((location) => (
+        {filteredLocations.map((location) => (
           <ListGroup.Item
             key={location.id}
             action
@@ -32,7 +58,7 @@ function LocationList() {
         ))}
       </ListGroup>
     </div>
-  )
+  );
 }
 
-export default LocationList
+export default LocationList;
